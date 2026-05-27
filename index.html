@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>DATA.AI Dashboard</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <!-- Chart JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family: Inter, sans-serif;
+      background:#020817;
+      color:white;
+      overflow:hidden;
+    }
+
+    ::-webkit-scrollbar{
+      width:7px;
+    }
+
+    ::-webkit-scrollbar-track{
+      background:#020817;
+    }
+
+    ::-webkit-scrollbar-thumb{
+      background:#1E293B;
+      border-radius:999px;
+    }
+
+    .glass{
+      background:rgba(15,23,42,.7);
+      backdrop-filter:blur(12px);
+    }
+
+    .card{
+      background:linear-gradient(
+        180deg,
+        rgba(15,23,42,.95),
+        rgba(2,6,23,.95)
+      );
+      border:1px solid rgba(148,163,184,.08);
+      box-shadow:
+      0 10px 30px rgba(0,0,0,.35),
+      inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    .menu-item{
+      transition:.3s;
+    }
+
+    .menu-item:hover{
+      background:rgba(255,255,255,.04);
+      color:white;
+    }
+
+    .active-menu{
+      background:rgba(99,102,241,.14);
+      border:1px solid rgba(99,102,241,.25);
+      color:#A5B4FC;
+      box-shadow:0 0 25px rgba(99,102,241,.15);
+    }
+
+    .page{
+      display:none;
+      animation:fade .3s ease;
+    }
+
+    .page.active{
+      display:block;
+    }
+
+    @keyframes fade{
+      from{
+        opacity:0;
+        transform:translateY(10px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="flex h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="w-[280px] bg-black/30 border-r border-slate-800 flex flex-col justify-between">
+
+    <div>
+
+      <!-- LOGO -->
+      <div class="p-8 border-b border-slate-800">
+
+        <h1 class="text-5xl font-black tracking-wider">
+          <span class="text-indigo-500">DATA</span>.AI
+        </h1>
+
+        <p class="text-slate-400 mt-2">
+          Premium Admin Dashboard
+        </p>
+
+      </div>
+
+      <!-- MENU -->
+      <nav class="p-5 space-y-3">
+
+        <button onclick="showPage('dashboard', this)"
+        class="menu-item active-menu w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left">
+
+          <i class="fa-solid fa-chart-line"></i>
+          Dashboard
+
+        </button>
+
+        <button onclick="showPage('analytics', this)"
+        class="menu-item w-full text-slate-400 flex items-center gap-4 px-5 py-4 rounded-2xl text-left">
+
+          <i class="fa-solid fa-chart-pie"></i>
+          Analytics
+
+        </button>
+
+        <button onclick="showPage('sales', this)"
+        class="menu-item w-full text-slate-400 flex items-center gap-4 px-5 py-4 rounded-2xl text-left">
+
+          <i class="fa-solid fa-cart-shopping"></i>
+          Sales
+
+        </button>
+
+        <button onclick="showPage('customers', this)"
+        class="menu-item w-full text-slate-400 flex items-center gap-4 px-5 py-4 rounded-2xl text-left">
+
+          <i class="fa-solid fa-users"></i>
+          Customers
+
+        </button>
+
+        <button onclick="showPage('settings', this)"
+        class="menu-item w-full text-slate-400 flex items-center gap-4 px-5 py-4 rounded-2xl text-left">
+
+          <i class="fa-solid fa-gear"></i>
+          Settings
+
+        </button>
+
+      </nav>
+
+    </div>
+
+    <!-- LOGOUT -->
+    <div class="p-5 border-t border-slate-800">
+
+      <button
+      class="w-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 py-4 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3">
+
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Logout
+
+      </button>
+
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- TOPBAR -->
+    <header class="h-[90px] border-b border-slate-800 glass px-8 flex items-center justify-between">
+
+      <div class="flex items-center gap-5">
+
+        <button class="text-2xl text-slate-400">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- SEARCH -->
+        <div class="relative">
+
+          <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+
+          <input
+          type="text"
+          placeholder="Cari data, laporan, transaksi..."
+          class="w-[420px] bg-slate-900 border border-slate-800 rounded-2xl h-[55px] pl-14 pr-5 outline-none focus:border-indigo-500 text-white placeholder-slate-500">
+
+        </div>
+
+      </div>
+
+      <!-- PROFILE -->
+      <div class="flex items-center gap-6">
+
+        <button class="relative text-slate-400 text-xl">
+
+          <i class="fa-regular fa-bell"></i>
+
+          <div class="w-2.5 h-2.5 bg-red-500 rounded-full absolute -top-1 -right-1"></div>
+
+        </button>
+
+        <div class="flex items-center gap-4">
+
+          <img
+          src="https://i.pravatar.cc/100?img=12"
+          class="w-14 h-14 rounded-full border-2 border-indigo-500">
+
+          <div>
+
+            <h3 class="font-semibold">
+              Admin Pembuat Web
+            </h3>
+
+            <p class="text-slate-400 text-sm mt-1">
+              Super Admin
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <!-- CONTENT -->
+    <main class="flex-1 overflow-y-auto p-8">
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="page active">
+
+        <div class="flex items-center justify-between mb-8">
+
+          <div>
+
+            <h1 class="text-5xl font-black mb-3">
+              Dashboard Overview
+            </h1>
+
+            <p class="text-slate-400 text-lg">
+              Ringkasan performa bisnis Anda hari ini
+            </p>
+
+          </div>
+
+          <button class="bg-slate-900 border border-slate-800 px-5 py-3 rounded-2xl text-slate-300 flex items-center gap-3">
+
+            <i class="fa-regular fa-calendar"></i>
+            1 Mei 2025 - 31 Mei 2025
+
+          </button>
+
+        </div>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+
+          <!-- CARD -->
+          <div class="card rounded-3xl p-6">
+
+            <div class="flex justify-between mb-6">
+
+              <div>
+
+                <p class="text-slate-400 mb-2">
+                  Total Pendapatan
+                </p>
+
+                <h2 class="text-4xl font-black">
+                  Rp245M
+                </h2>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl">
+
+                <i class="fa-solid fa-wallet"></i>
+
+              </div>
+
+            </div>
+
+            <span class="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-sm">
+              +12% bulan ini
+            </span>
+
+          </div>
+
+          <!-- CARD -->
+          <div class="card rounded-3xl p-6">
+
+            <div class="flex justify-between mb-6">
+
+              <div>
+
+                <p class="text-slate-400 mb-2">
+                  Produk Terjual
+                </p>
+
+                <h2 class="text-4xl font-black">
+                  1,420
+                </h2>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl">
+
+                <i class="fa-solid fa-box"></i>
+
+              </div>
+
+            </div>
+
+            <span class="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-sm">
+              +4%
+            </span>
+
+          </div>
+
+          <!-- CARD -->
+          <div class="card rounded-3xl p-6">
+
+            <div class="flex justify-between mb-6">
+
+              <div>
+
+                <p class="text-slate-400 mb-2">
+                  Pengunjung Baru
+                </p>
+
+                <h2 class="text-4xl font-black">
+                  12,450
+                </h2>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-orange-500/20 text-orange-400 flex items-center justify-center text-2xl">
+
+                <i class="fa-solid fa-user-plus"></i>
+
+              </div>
+
+            </div>
+
+            <span class="bg-red-500/10 text-red-400 px-4 py-2 rounded-full text-sm">
+              -2%
+            </span>
+
+          </div>
+
+          <!-- CARD -->
+          <div class="card rounded-3xl p-6">
+
+            <div class="flex justify-between mb-6">
+
+              <div>
+
+                <p class="text-slate-400 mb-2">
+                  Total Pesanan
+                </p>
+
+                <h2 class="text-4xl font-black">
+                  850
+                </h2>
+
+              </div>
+
+              <div class="w-16 h-16 rounded-2xl bg-pink-500/20 text-pink-400 flex items-center justify-center text-2xl">
+
+                <i class="fa-solid fa-receipt"></i>
+
+              </div>
+
+            </div>
+
+            <span class="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-sm">
+              +8%
+            </span>
+
+          </div>
+
+        </div>
+
+        <!-- CHART -->
+        <div class="card rounded-3xl p-7">
+
+          <div class="flex items-center justify-between mb-7">
+
+            <div>
+
+              <h2 class="text-3xl font-bold">
+                Analytics Penjualan
+              </h2>
+
+              <p class="text-slate-400 mt-2">
+                Statistik pendapatan dan transaksi
+              </p>
+
+            </div>
+
+            <div class="bg-indigo-500/15 text-indigo-400 px-4 py-2 rounded-xl text-sm">
+              Live Data
+            </div>
+
+          </div>
+
+          <div class="h-[420px]">
+            <canvas id="salesChart"></canvas>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ANALYTICS -->
+      <section id="analytics" class="page">
+
+        <h1 class="text-5xl font-black mb-3">
+          Analytics Overview
+        </h1>
+
+        <p class="text-slate-400 mb-8 text-lg">
+          Analisis performa dan traffic website
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+
+          <div class="card rounded-3xl p-6">
+            <p class="text-slate-400">Visitors</p>
+            <h2 class="text-4xl font-black mt-2">124K</h2>
+          </div>
+
+          <div class="card rounded-3xl p-6">
+            <p class="text-slate-400">Bounce Rate</p>
+            <h2 class="text-4xl font-black mt-2">32%</h2>
+          </div>
+
+          <div class="card rounded-3xl p-6">
+            <p class="text-slate-400">Conversion</p>
+            <h2 class="text-4xl font-black mt-2">3.2%</h2>
+          </div>
+
+          <div class="card rounded-3xl p-6">
+            <p class="text-slate-400">Session</p>
+            <h2 class="text-4xl font-black mt-2">04:21</h2>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SALES -->
+      <section id="sales" class="page">
+
+        <h1 class="text-5xl font-black mb-3">
+          Sales Management
+        </h1>
+
+        <p class="text-slate-400 mb-8 text-lg">
+          Kelola semua penjualan bisnis
+        </p>
+
+        <div class="card rounded-3xl p-8">
+
+          <table class="w-full">
+
+            <thead class="text-slate-400 border-b border-slate-800">
+
+              <tr>
+
+                <th class="text-left py-4">Produk</th>
+                <th class="text-left py-4">Harga</th>
+                <th class="text-left py-4">Status</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr class="border-b border-slate-800">
+
+                <td class="py-5">Laptop Gaming</td>
+                <td>Rp12jt</td>
+                <td>
+                  <span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-sm">
+                    Success
+                  </span>
+                </td>
+
+              </tr>
+
+              <tr>
+
+                <td class="py-5">Mechanical Keyboard</td>
+                <td>Rp1.5jt</td>
+                <td>
+                  <span class="bg-yellow-500/10 text-yellow-400 px-3 py-1 rounded-full text-sm">
+                    Pending
+                  </span>
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+      <!-- CUSTOMERS -->
+      <section id="customers" class="page">
+
+        <h1 class="text-5xl font-black mb-3">
+          Customers Management
+        </h1>
+
+        <p class="text-slate-400 mb-8 text-lg">
+          Data pelanggan dan aktivitas
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+          <div class="card rounded-3xl p-6">
+            <h3 class="text-xl font-bold">Rizky Pratama</h3>
+            <p class="text-slate-400 mt-2">Active Customer</p>
+          </div>
+
+          <div class="card rounded-3xl p-6">
+            <h3 class="text-xl font-bold">Andini Putri</h3>
+            <p class="text-slate-400 mt-2">Premium Member</p>
+          </div>
+
+          <div class="card rounded-3xl p-6">
+            <h3 class="text-xl font-bold">Fajar Nugraha</h3>
+            <p class="text-slate-400 mt-2">New Customer</p>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings" class="page">
+
+        <h1 class="text-5xl font-black mb-3">
+          Settings
+        </h1>
+
+        <p class="text-slate-400 mb-8 text-lg">
+          Pengaturan akun dan dashboard
+        </p>
+
+        <div class="card rounded-3xl p-8 max-w-3xl">
+
+          <div class="mb-6">
+
+            <label class="block text-slate-400 mb-3">
+              Nama Lengkap
+            </label>
+
+            <input
+            type="text"
+            value="Admin Pembuat Web"
+            class="w-full bg-slate-900 border border-slate-800 rounded-2xl h-[55px] px-5 outline-none focus:border-indigo-500">
+
+          </div>
+
+          <div class="mb-6">
+
+            <label class="block text-slate-400 mb-3">
+              Email
+            </label>
+
+            <input
+            type="email"
+            value="admin@email.com"
+            class="w-full bg-slate-900 border border-slate-800 rounded-2xl h-[55px] px-5 outline-none focus:border-indigo-500">
+
+          </div>
+
+          <button class="bg-indigo-500 hover:bg-indigo-600 transition px-6 py-4 rounded-2xl font-semibold">
+
+            Simpan Perubahan
+
+          </button>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+
+  // SPA PAGE
+  function showPage(pageId, element){
+
+    // hide all pages
+    document.querySelectorAll('.page').forEach(page=>{
+      page.classList.remove('active');
+    });
+
+    // show selected
+    document.getElementById(pageId).classList.add('active');
+
+    // remove active menu
+    document.querySelectorAll('.menu-item').forEach(menu=>{
+      menu.classList.remove('active-menu');
+    });
+
+    // active current menu
+    element.classList.add('active-menu');
+  }
+
+  // CHART
+  const ctx = document.getElementById('salesChart').getContext('2d');
+
+  const gradient = ctx.createLinearGradient(0,0,0,500);
+
+  gradient.addColorStop(0,'rgba(99,102,241,.4)');
+  gradient.addColorStop(1,'rgba(99,102,241,0)');
+
+  new Chart(ctx,{
+    type:'line',
+
+    data:{
+      labels:['Jan','Feb','Mar','Apr','Mei','Jun'],
+
+      datasets:[
+
+        {
+          label:'Pendapatan',
+          data:[28,50,43,59,78,95],
+          borderColor:'#6366F1',
+          backgroundColor:gradient,
+          fill:true,
+          tension:.4,
+          pointBackgroundColor:'#6366F1',
+          pointBorderColor:'#fff',
+          borderWidth:3
+        },
+
+        {
+          label:'Transaksi',
+          data:[10,22,20,33,46,67],
+          borderColor:'#14B8A6',
+          tension:.4,
+          pointBackgroundColor:'#14B8A6',
+          pointBorderColor:'#fff',
+          borderWidth:3
+        }
+
+      ]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+
+      plugins:{
+        legend:{
+          labels:{
+            color:'#CBD5E1'
+          }
+        }
+      },
+
+      scales:{
+        x:{
+          ticks:{
+            color:'#64748B'
+          },
+          grid:{
+            color:'rgba(255,255,255,.03)'
+          }
+        },
+        y:{
+          ticks:{
+            color:'#64748B'
+          },
+          grid:{
+            color:'rgba(255,255,255,.03)'
+          }
+        }
+      }
+    }
+
+  });
+
+</script>
+
+</body>
+</html>
